@@ -106,6 +106,7 @@ class LaTeXExtension(markdown.Extension):
         md.postprocessors.register(image_pp, 'image', 20)
         md.postprocessors.register(table_pp, 'table', 20)
         md.postprocessors.register(link_pp, 'link', 20)
+        md.postprocessors.register(RootRemovalTextPostProcessor(), 'root_removal', 20)
 
     def reset(self):
         pass
@@ -476,6 +477,9 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
                 new_blocks.append(block)
         return '\n\n'.join(new_blocks)
 
+class RootRemovalTextPostProcessor(markdown.postprocessors.Postprocessor):
+    def run(self, instr: str) -> str:
+        return instr.replace('<root>', '').replace('</root>', '')
 
 class Link2Latex(object):
     def convert(self, instr):
