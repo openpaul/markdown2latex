@@ -47,13 +47,14 @@ def unescape_html_entities(text):
     return out
 
 
+LATEX_ENTETIES = ['%', '&', '#']
+
 def escape_latex_entities(text):
     """Escape latex reserved characters."""
     out = text
     out = unescape_html_entities(out)
-    out = out.replace('%', '\\%')
-    out = out.replace('&', '\\&')
-    out = out.replace('#', '\\#')
+    for entity in LATEX_ENTETIES:
+        out = out.replace(entity, f"\\{entity}")
     out = start_single_quote_re.sub('\g<1>`', out)
     out = start_double_quote_re.sub('\g<1>``', out)
     out = end_double_quote_re.sub("''\g<1>", out)
@@ -68,7 +69,8 @@ def escape_latex_entities(text):
 def unescape_latex_entities(text):
     """Limit ourselves as this is only used for maths stuff."""
     out = text
-    out = out.replace('\\&', '&')
+    for entity in LATEX_ENTETIES:
+        out = out.replace(f"\\{entity}", entity)
     return out
 
 
@@ -236,7 +238,7 @@ class UnescapeHtmlTextPostProcessor(markdown.postprocessors.Postprocessor):
 
 class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
 
-    def run(self, instr):
+    def run(self, instr: str) -> str:
         """Convert all math sections in {text} whether latex, asciimathml or
         latexmathml formatted to latex.
 
@@ -244,24 +246,28 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
         mathematics delimiter (*not* the standard asciimathml or latexmathml
         delimiter).
         """
-        def repl_1(matchobj):
+        def replace_block_math(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
-            return '\\[%s\\]' % text
+            return '\[%s\]' % text
 
-        def repl_2(matchobj):
+        def replace_inline_math(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
             return '\\(%s\\)' % text
-
+        
         # This $$x=3$$ is block math
-        pat = re.compile('\$\$([^\$]*)\$\$')
-        out = pat.sub(repl_1, instr)
+        pat = re.compile(r'\$\$([^\\\$]*)\$\$')
+        out = pat.sub(replace_block_math, instr)
         # This $x=3$ is inline math
-        pat2 = re.compile('\$([^\$]*)\$')
-        out = pat2.sub(repl_2, out)
+        pat2 = re.compile(r'\$([^\\\$]*)\$')
+        out = pat2.sub(replace_inline_math, out)
         # some extras due to asciimathml
         out = out.replace('\\lt', '<')
         out = out.replace(' * ', ' \\cdot ')
         out = out.replace('\\del', '\\partial')
+
+        # escape all single dollars, so all leftover dollar signs
+        out = out.replace("$", "\\$")
+
         return out
 
 
