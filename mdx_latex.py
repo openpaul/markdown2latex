@@ -255,10 +255,10 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
             return '\\(%s\\)' % text
         
         # This $$x=3$$ is block math
-        pat = re.compile(r'\$\$([^\\\$]*)\$\$')
+        pat = re.compile(r'\$\$([^\$]*)\$\$')
         out = pat.sub(replace_block_math, instr)
         # This $x=3$ is inline math
-        pat2 = re.compile(r'\$([^\\\$]*)\$')
+        pat2 = re.compile(r'\$([^\$]*)\$')
         out = pat2.sub(replace_inline_math, out)
         # some extras due to asciimathml
         out = out.replace('\\lt', '<')

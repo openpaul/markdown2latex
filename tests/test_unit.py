@@ -116,3 +116,12 @@ def test_math_basic():
     output = markdown.markdown(markdown_text, extensions=[LaTeXExtension()])
 
     assert output == expected_output
+
+def test_formular():
+
+    md  = "$$ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta * z^{n} $$"
+
+    expected_output = "\\[ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta \cdot z^{n} \\]"
+
+    output = markdown.markdown(md, extensions=[LaTeXExtension()])
+    assert output == expected_output
