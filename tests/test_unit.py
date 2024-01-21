@@ -1,3 +1,6 @@
+import markdown
+import pytest
+
 from mdx_latex import (
     LaTeXExtension,
     escape_latex_entities,
@@ -6,8 +9,6 @@ from mdx_latex import (
     unescape_html_entities,
     unescape_latex_entities,
 )
-import markdown
-import pytest
 
 
 def test_inline_html_latex():
@@ -73,7 +74,6 @@ A simple list:
     )
 
 
-
 @pytest.mark.parametrize(
     "markdown_text,expected_output",
     [
@@ -83,12 +83,31 @@ A simple list:
         ("Hello $World$", "Hello \\(World\\)"),
         ("Hello $$World$$", "Hello \\[World\\]"),
         ("Hello $World", "Hello \\$World"),
-        ("$$ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta * z^{n} $$",
-         "\\[ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta \\cdot z^{n} \\]"),
-        ("Some mathematics inline, $$X$$, $Y$, a $100 million, a %tage and then a formula:",
-         "Some mathematics inline, \\[X\\], \\(Y\\), a \\$100 million, a \\%tage and then a formula:")
+        (
+            "$$ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta * z^{n} $$",
+            "\\[ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta \\cdot z^{n} \\]",
+        ),
+        (
+            "Some mathematics inline, $$X$$, $Y$, a $100 million, a %tage and then a formula:",
+            "Some mathematics inline, \\[X\\], \\(Y\\), a \\$100 million, a \\%tage and then a formula:",
+        ),
+        (
+            "A table now (this is *really* complicated):",
+            "A table now (this is \\emph{really} complicated):",
+        ),
     ],
 )
-def test_online(markdown_text, expected_output):
+def test_one_line(markdown_text: str, expected_output: str):
+    output = markdown.markdown(markdown_text, extensions=[LaTeXExtension()])
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
+    "markdown_text,expected_output",
+    [
+        ("Multiple\nLines", "Multiple\nLines"),
+    ],
+)
+def test_multi_line(markdown_text: str, expected_output: str):
     output = markdown.markdown(markdown_text, extensions=[LaTeXExtension()])
     assert output == expected_output
