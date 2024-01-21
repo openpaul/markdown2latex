@@ -485,7 +485,10 @@ class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
 
 class RootRemovalTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr: str) -> str:
-        return instr.replace('<root>', '').replace('</root>', '')
+        lines = instr.split('\n')
+        if lines[0] == '<root>' and lines[-1] == '</root>':
+            lines = lines[1:-1]
+        return '\n'.join(lines)
 
 class Link2Latex(object):
     def convert(self, instr):
