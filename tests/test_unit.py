@@ -1,3 +1,4 @@
+from math import exp
 import markdown
 import pytest
 
@@ -109,6 +110,14 @@ def test_one_line(markdown_text: str, expected_output: str):
     "markdown_text,expected_output",
     [
         ("Multiple\nLines", "Multiple\nLines"),
+        (
+            '![Alt caption text](link to image.webp "Title field")',
+            """\\begin{figure}[H]
+            \\centering
+            \\includegraphics[max width=\\linewidth]{link to image.webp}
+            \\caption{Alt caption text}
+            \\end{figure}""",
+        ),
     ],
 )
 def test_multi_line(markdown_text: str, expected_output: str):
