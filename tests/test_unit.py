@@ -83,6 +83,7 @@ A simple list:
         ("Hello $World$", "Hello \\(World\\)"),
         ("Hello $$World$$", "Hello \\[World\\]"),
         ("Hello $World", "Hello \\$World"),
+        ("Hello **World**", "Hello \\textbf{World}"),
         (
             "$$ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta * z^{n} $$",
             "\\[ \\sum_{i}^{\\infty} x^{n} + y^{n} = \\alpha +  \\beta \\cdot z^{n} \\]",
