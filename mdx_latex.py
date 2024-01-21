@@ -13,41 +13,43 @@ import tempfile
 import urllib.request, urllib.parse, urllib.error
 
 
-start_single_quote_re = re.compile("(^|\s|\")'")
-start_double_quote_re = re.compile("(^|\s|'|`)\"")
-end_double_quote_re = re.compile("\"(,|\.|\s|$)")
+start_single_quote_re = re.compile(r"(^|\s|\")'")
+start_double_quote_re = re.compile(r"(^|\s|'|`)\"")
+end_double_quote_re = re.compile(r"\"(,|\.|\s|$)")
+
 
 def inline_html_latex(text):
     out = text
     # most of them to support smarty extensions
-    if re.search(r'&ldquo;.*?&rdquo;', text , flags=re.DOTALL):
-        out = out.replace('&ldquo;', '\enquote{').replace('&rdquo;', '}')
+    if re.search(r"&ldquo;.*?&rdquo;", text, flags=re.DOTALL):
+        out = out.replace("&ldquo;", "\enquote{").replace("&rdquo;", "}")
     # replace certain html element with they LaTeX eqivarent
-    if re.search(r'&lsquo;.*?&rsquo;', text , flags=re.DOTALL):
-        out = out.replace('&lsquo;', '\enquote{').replace('&rsquo;', '}')
-    if re.search(r'&ldquo;.*?&ldquo;', text , flags=re.DOTALL):
+    if re.search(r"&lsquo;.*?&rsquo;", text, flags=re.DOTALL):
+        out = out.replace("&lsquo;", "\enquote{").replace("&rsquo;", "}")
+    if re.search(r"&ldquo;.*?&ldquo;", text, flags=re.DOTALL):
         # sometimes is processing like this
-        out = out.replace('&ldquo;', '\enquote{', 1).replace('&ldquo;', '}', 1)
-    if re.search(r'&laquo;.*?&raquo;', text , flags=re.DOTALL):
-        out = out.replace('&laquo;', '\enquote{').replace('&raquo;', '}')
+        out = out.replace("&ldquo;", "\enquote{", 1).replace("&ldquo;", "}", 1)
+    if re.search(r"&laquo;.*?&raquo;", text, flags=re.DOTALL):
+        out = out.replace("&laquo;", "\enquote{").replace("&raquo;", "}")
     out = out.replace("...", "\dots")
     out = out.replace("&hellip;", "\dots")
     out = out.replace("&ndash;", "--")
-    out = out.replace("&mdash;", "---")    
+    out = out.replace("&mdash;", "---")
     # replace '\|' as we should already processed the tables and do not need in LaTeX
-    out = out.replace("\|", '|')
-    return out 
-        
-
-def unescape_html_entities(text):
-    out = text.replace('&amp;', '&')
-    out = out.replace('&lt;', '<')
-    out = out.replace('&gt;', '>')
-    out = out.replace('&quot;', '"')
+    out = out.replace("\|", "|")
     return out
 
 
-LATEX_ENTETIES = ['%', '&', '#']
+def unescape_html_entities(text):
+    out = text.replace("&amp;", "&")
+    out = out.replace("&lt;", "<")
+    out = out.replace("&gt;", ">")
+    out = out.replace("&quot;", '"')
+    return out
+
+
+LATEX_ENTETIES = ["%", "&", "#"]
+
 
 def escape_latex_entities(text):
     """Escape latex reserved characters."""
@@ -55,8 +57,8 @@ def escape_latex_entities(text):
     out = unescape_html_entities(out)
     for entity in LATEX_ENTETIES:
         out = out.replace(entity, f"\\{entity}")
-    out = start_single_quote_re.sub('\g<1>`', out)
-    out = start_double_quote_re.sub('\g<1>``', out)
+    out = start_single_quote_re.sub("\g<1>`", out)
+    out = start_double_quote_re.sub("\g<1>``", out)
     out = end_double_quote_re.sub("''\g<1>", out)
     # people should escape these themselves as it conflicts with maths
     # out = out.replace('{', '\\{')
@@ -92,8 +94,8 @@ class LaTeXExtension(markdown.Extension):
         #         self.md.inlinePatterns.pop(key)
         #         break
 
-        #footnote_extension = FootnoteExtension()
-        #footnote_extension.extendMarkdown(md, md_globals)
+        # footnote_extension = FootnoteExtension()
+        # footnote_extension.extendMarkdown(md, md_globals)
 
         latex_tp = LaTeXTreeProcessor()
         math_pp = MathTextPostProcessor()
@@ -102,13 +104,13 @@ class LaTeXExtension(markdown.Extension):
         link_pp = LinkTextPostProcessor()
         unescape_html_pp = UnescapeHtmlTextPostProcessor()
 
-        md.treeprocessors.register(latex_tp, 'latex', 20)
-        md.postprocessors.register(unescape_html_pp, 'unescape_html', 20)
-        md.postprocessors.register(math_pp, 'math', 20)
-        md.postprocessors.register(image_pp, 'image', 20)
-        md.postprocessors.register(table_pp, 'table', 20)
-        md.postprocessors.register(link_pp, 'link', 20)
-        md.postprocessors.register(RootRemovalTextPostProcessor(), 'root_removal', 20)
+        md.treeprocessors.register(latex_tp, "latex", 20)
+        md.postprocessors.register(unescape_html_pp, "unescape_html", 20)
+        md.postprocessors.register(math_pp, "math", 20)
+        md.postprocessors.register(image_pp, "image", 20)
+        md.postprocessors.register(table_pp, "table", 20)
+        md.postprocessors.register(link_pp, "link", 20)
+        md.postprocessors.register(RootRemovalTextPostProcessor(), "root_removal", 20)
 
     def reset(self):
         pass
@@ -121,7 +123,7 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
         latex_text = self.tolatex(doc)
 
         doc.clear()
-        latex_node = etree.Element('root')
+        latex_node = etree.Element("root")
         latex_node.text = latex_text
         doc.append(latex_node)
 
@@ -136,42 +138,48 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
             for child in list(ournode):
                 subcontent += self.tolatex(child)
 
-        if ournode.tag == 'h1':
-            buffer += '\n\\title{%s}\n' % subcontent
+        if ournode.tag == "h1":
+            buffer += "\n\\title{%s}\n" % subcontent
             buffer += """
 % ----------------------------------------------------------------
 \maketitle
 % ----------------------------------------------------------------
 """
-        elif ournode.tag == 'h2':
-            buffer += '\n\n\\section{%s}\n' % subcontent
-        elif ournode.tag == 'h3':
-            buffer += '\n\n\\subsection{%s}\n' % subcontent
-        elif ournode.tag == 'h4':
-            buffer += '\n\\subsubsection{%s}\n' % subcontent
-        elif ournode.tag == 'hr':
-            buffer += '\\noindent\makebox[\linewidth]{\\rule{\linewidth}{0.4pt}}'
-        elif ournode.tag == 'ul':
+        elif ournode.tag == "h2":
+            buffer += "\n\n\\section{%s}\n" % subcontent
+        elif ournode.tag == "h3":
+            buffer += "\n\n\\subsection{%s}\n" % subcontent
+        elif ournode.tag == "h4":
+            buffer += "\n\\subsubsection{%s}\n" % subcontent
+        elif ournode.tag == "hr":
+            buffer += "\\noindent\makebox[\linewidth]{\\rule{\linewidth}{0.4pt}}"
+        elif ournode.tag == "ul":
             # no need for leading \n as one will be provided by li
-            buffer += """
+            buffer += (
+                """
 \\begin{itemize}%s
 \\end{itemize}
-""" % subcontent
-        elif ournode.tag == 'ol':
+"""
+                % subcontent
+            )
+        elif ournode.tag == "ol":
             buffer += """
-\\begin{enumerate}"""            
-            if 'start' in ournode.attrib.keys():
-                start = int(ournode.attrib['start'])-1
-                buffer += "\setcounter{enumi}{"+str(start)+"}"
+\\begin{enumerate}"""
+            if "start" in ournode.attrib.keys():
+                start = int(ournode.attrib["start"]) - 1
+                buffer += "\setcounter{enumi}{" + str(start) + "}"
             # no need for leading \n as one will be provided by li
-            buffer += """
+            buffer += (
+                """
 %s
 \\end{enumerate}
-""" % subcontent
-        elif ournode.tag == 'li':
+"""
+                % subcontent
+            )
+        elif ournode.tag == "li":
             buffer += """
   \\item %s""" % subcontent.strip()
-        elif ournode.tag == 'blockquote':
+        elif ournode.tag == "blockquote":
             # use quotation rather than quote as quotation can support multiple
             # paragraphs
             buffer += """
@@ -181,44 +189,51 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
 """ % subcontent.strip()
         # ignore 'code' when inside pre tags
         # (mkdn produces <pre><code></code></pre>)
-        elif (ournode.tag == 'pre' or
-                             # TODO: Take a look here
-             (ournode.tag == 'pre' and ournode.parentNode.tag != 'pre')):
+        elif (
+            ournode.tag == "pre"
+            or
+            # TODO: Take a look here
+            (ournode.tag == "pre" and ournode.parentNode.tag != "pre")
+        ):
             buffer += """
 \\begin{verbatim}
 %s
 \\end{verbatim}
 """ % subcontent.strip()
-        elif ournode.tag == 'q':
+        elif ournode.tag == "q":
             buffer += "`%s'" % subcontent.strip()
-        elif ournode.tag == 'p':
-            buffer += '\n%s\n' % subcontent.strip()
+        elif ournode.tag == "p":
+            buffer += "\n%s\n" % subcontent.strip()
         # Footnote processor inserts all of the footnote in a sup tag
-        elif ournode.tag == 'sup':
-            buffer += '\\footnote{%s}' % subcontent.strip()
-        elif ournode.tag == 'strong':
-            buffer += '\\textbf{%s}' % subcontent.strip()
-        elif ournode.tag == 'em':
-            buffer += '\\emph{%s}' % subcontent.strip()
+        elif ournode.tag == "sup":
+            buffer += "\\footnote{%s}" % subcontent.strip()
+        elif ournode.tag == "strong":
+            buffer += "\\textbf{%s}" % subcontent.strip()
+        elif ournode.tag == "em":
+            buffer += "\\emph{%s}" % subcontent.strip()
         # Keep table strcuture. TableTextPostProcessor will take care.
-        elif ournode.tag == 'table':
-            buffer += '\n\n<table>%s</table>\n\n' % subcontent
-        elif ournode.tag == 'thead':
-            buffer += '<thead>%s</thead>' % subcontent
-        elif ournode.tag == 'tbody':
-            buffer += '<tbody>%s</tbody>' % subcontent
-        elif ournode.tag == 'tr':
-            buffer += '<tr>%s</tr>' % subcontent
-        elif ournode.tag == 'th':
-            buffer += '<th>%s</th>' % subcontent
-        elif ournode.tag == 'td':
-            buffer += '<td>%s</td>' % subcontent
-        elif ournode.tag == 'img':
-            buffer += '<img src=\"%s\" alt=\"%s\" />' % (ournode.get('src'),
-                      ournode.get('alt'))
-        elif ournode.tag == 'a':
-            buffer += '<a href=\"%s\">%s</a>' % (escape_latex_entities(ournode.get('href')),
-                      subcontent)
+        elif ournode.tag == "table":
+            buffer += "\n\n<table>%s</table>\n\n" % subcontent
+        elif ournode.tag == "thead":
+            buffer += "<thead>%s</thead>" % subcontent
+        elif ournode.tag == "tbody":
+            buffer += "<tbody>%s</tbody>" % subcontent
+        elif ournode.tag == "tr":
+            buffer += "<tr>%s</tr>" % subcontent
+        elif ournode.tag == "th":
+            buffer += "<th>%s</th>" % subcontent
+        elif ournode.tag == "td":
+            buffer += "<td>%s</td>" % subcontent
+        elif ournode.tag == "img":
+            buffer += '<img src="%s" alt="%s" />' % (
+                ournode.get("src"),
+                ournode.get("alt"),
+            )
+        elif ournode.tag == "a":
+            buffer += '<a href="%s">%s</a>' % (
+                escape_latex_entities(ournode.get("href")),
+                subcontent,
+            )
         else:
             buffer = subcontent
 
@@ -229,15 +244,14 @@ class LaTeXTreeProcessor(markdown.treeprocessors.Treeprocessor):
 
 
 class UnescapeHtmlTextPostProcessor(markdown.postprocessors.Postprocessor):
-
     def run(self, text):
         return unescape_html_entities(inline_html_latex(text))
+
 
 # ========================= MATHS =================================
 
 
 class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
-
     def run(self, instr: str) -> str:
         """Convert all math sections in {text} whether latex, asciimathml or
         latexmathml formatted to latex.
@@ -246,24 +260,25 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
         mathematics delimiter (*not* the standard asciimathml or latexmathml
         delimiter).
         """
+
         def replace_block_math(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
-            return '\[%s\]' % text
+            return "\[%s\]" % text
 
         def replace_inline_math(matchobj):
             text = unescape_latex_entities(matchobj.group(1))
-            return '\\(%s\\)' % text
-        
+            return "\\(%s\\)" % text
+
         # This $$x=3$$ is block math
-        pat = re.compile(r'\$\$([^\$]*)\$\$')
+        pat = re.compile(r"\$\$([^\$]*)\$\$")
         out = pat.sub(replace_block_math, instr)
         # This $x=3$ is inline math
-        pat2 = re.compile(r'\$([^\$]*)\$')
+        pat2 = re.compile(r"\$([^\$]*)\$")
         out = pat2.sub(replace_inline_math, out)
         # some extras due to asciimathml
-        out = out.replace('\\lt', '<')
-        out = out.replace(' * ', ' \\cdot ')
-        out = out.replace('\\del', '\\partial')
+        out = out.replace("\\lt", "<")
+        out = out.replace(" * ", " \\cdot ")
+        out = out.replace("\\del", "\\partial")
 
         # escape all single dollars, so all leftover dollar signs
         out = out.replace("$", "\\$")
@@ -273,8 +288,8 @@ class MathTextPostProcessor(markdown.postprocessors.Postprocessor):
 
 # ========================= TABLES =================================
 
-class TableTextPostProcessor(markdown.postprocessors.Postprocessor):
 
+class TableTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr):
         """This is not very sophisticated and for it to work it is expected
         that:
@@ -285,15 +300,15 @@ class TableTextPostProcessor(markdown.postprocessors.Postprocessor):
         converter = Table2Latex()
         new_blocks = []
 
-        for block in instr.split('\n\n'):
+        for block in instr.split("\n\n"):
             stripped = block.strip()
             # <table catches modified verions (e.g. <table class="..">
-            if stripped.startswith('<table') and stripped.endswith('</table>'):
+            if stripped.startswith("<table") and stripped.endswith("</table>"):
                 latex_table = converter.convert(stripped).strip()
                 new_blocks.append(latex_table)
             else:
                 new_blocks.append(block)
-        return '\n\n'.join(new_blocks)
+        return "\n\n".join(new_blocks)
 
 
 class Table2Latex:
@@ -305,17 +320,17 @@ class Table2Latex:
 
     def colformat(self):
         # centre align everything by default
-        out = '|l' * self.maxcols + '|'
+        out = "|l" * self.maxcols + "|"
         return out
 
     def get_text(self, element):
         if element.nodeType == element.TEXT_NODE:
             return escape_latex_entities(element.data)
-        result = ''
+        result = ""
         if element.childNodes:
             for child in element.childNodes:
                 text = self.get_text(child)
-                if text.strip() != '':
+                if text.strip() != "":
                     result += text
         return result
 
@@ -325,11 +340,11 @@ class Table2Latex:
         subcontent = self.get_text(element)
         buffer = ""
 
-        if element.tagName == 'th':
-            subcontent = '\\textbf{%s}' % subcontent
-        if element.hasAttribute('colspan'):
-            colspan = int(element.getAttribute('colspan'))
-            buffer += ' \multicolumn{%s}{|c|}{%s}' % (colspan, subcontent)
+        if element.tagName == "th":
+            subcontent = "\\textbf{%s}" % subcontent
+        if element.hasAttribute("colspan"):
+            colspan = int(element.getAttribute("colspan"))
+            buffer += " \multicolumn{%s}{|c|}{%s}" % (colspan, subcontent)
         # we don't support rowspan because:
         #   1. it needs an extra latex package \usepackage{multirow}
         #   2. it requires us to mess around with the alignment tags in
@@ -339,15 +354,16 @@ class Table2Latex:
         #     rowspan = int(element.getAttribute('rowspan'))
         #     buffer += ' \multirow{%s}{|c|}{%s}' % (rowspan, subcontent)
         else:
-            buffer += ' %s' % subcontent
+            buffer += " %s" % subcontent
 
-        notLast = (element.nextSibling.nextSibling and
-                   element.nextSibling.nextSibling.nodeType ==
-                   element.ELEMENT_NODE and
-                   element.nextSibling.nextSibling.tagName in ['td', 'th'])
+        notLast = (
+            element.nextSibling.nextSibling
+            and element.nextSibling.nextSibling.nodeType == element.ELEMENT_NODE
+            and element.nextSibling.nextSibling.tagName in ["td", "th"]
+        )
 
         if notLast:
-            buffer += ' &'
+            buffer += " &"
 
         self.numcols += colspan
         return buffer
@@ -365,15 +381,15 @@ class Table2Latex:
                     subcontent += text
         subcontent = subcontent.strip()
 
-        if element.tagName == 'thead':
+        if element.tagName == "thead":
             buffer += subcontent
 
-        elif element.tagName == 'tr':
+        elif element.tagName == "tr":
             self.maxcols = max(self.numcols, self.maxcols)
             self.numcols = 0
-            buffer += '\n\\hline\n%s \\\\' % subcontent
+            buffer += "\n\\hline\n%s \\\\" % subcontent
 
-        elif element.tagName == 'td' or element.tagName == 'th':
+        elif element.tagName == "td" or element.tagName == "th":
             buffer = self.process_cell(element)
         else:
             buffer += subcontent
@@ -385,14 +401,13 @@ class Table2Latex:
         dom = xml.dom.minidom.parseString(instr)
         core = self.tolatex(dom.documentElement)
 
-        captionElements = dom.documentElement.getElementsByTagName('caption')
-        caption = ''
+        captionElements = dom.documentElement.getElementsByTagName("caption")
+        caption = ""
         if captionElements:
             caption = self.get_text(captionElements[0])
 
         colformatting = self.colformat()
-        table_latex = \
-            """
+        table_latex = """
             \\begin{table}[h]
             \\begin{tabular}{%s}
             %s
@@ -407,8 +422,8 @@ class Table2Latex:
 
 # ========================= IMAGES =================================
 
-class ImageTextPostProcessor(markdown.postprocessors.Postprocessor):
 
+class ImageTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr):
         """Process all img tags
 
@@ -421,35 +436,37 @@ class ImageTextPostProcessor(markdown.postprocessors.Postprocessor):
         for block in instr.split("\n\n"):
             stripped = block.strip()
             # <table catches modified verions (e.g. <table class="..">
-            if stripped.startswith('<img'):
+            if stripped.startswith("<img"):
                 latex_img = converter.convert(stripped).strip()
                 new_blocks.append(latex_img)
             else:
                 new_blocks.append(block)
-        return '\n\n'.join(new_blocks)
+        return "\n\n".join(new_blocks)
 
 
 class Img2Latex(object):
     def convert(self, instr):
+        if not instr.startswith("<img"):
+            raise Exception("Img2Latex.convert called with non-img tag")
+
         dom = xml.dom.minidom.parseString(instr)
         img = dom.documentElement
-        src = img.getAttribute('src')
+        src = img.getAttribute("src")
 
-        if urlparse(src).scheme != '':
+        if urlparse(src).scheme != "":
             src_urlparse = urlparse(src)
             conn = http.client.HTTPConnection(src_urlparse.netloc)
-            conn.request('HEAD', src_urlparse.path)
+            conn.request("HEAD", src_urlparse.path)
             response = conn.getresponse()
             conn.close()
             if response.status == 200:
-                filename = os.path.join(tempfile.mkdtemp(), src.split('/')[-1])
+                filename = os.path.join(tempfile.mkdtemp(), src.split("/")[-1])
                 urllib.request.urlretrieve(src, filename)
                 src = filename
 
-        alt = img.getAttribute('alt')
-	# Using graphicx and ajustbox package for *max width*
-        out = \
-            """
+        alt = img.getAttribute("alt")
+        # Using graphicx and ajustbox package for *max width*
+        out = """
             \\begin{figure}[H]
             \\centering
             \\includegraphics[max width=\\linewidth]{%s}
@@ -461,47 +478,51 @@ class Img2Latex(object):
 
 # ========================== LINKS =================================
 
-class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
 
+class LinkTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr):
         # Process all hyperlinks
         converter = Link2Latex()
         new_blocks = []
         for block in instr.split("\n\n"):
             stripped = block.strip()
-            match = re.findall(r'<a[^>]*>[^<]+</a>', stripped)
+            match = re.findall(r"<a[^>]*>[^<]+</a>", stripped)
             # <table catches modified verions (e.g. <table class="..">
             if match:
                 latex_link = stripped
                 # replace multiple <a> occurrences individually
                 for occurrence in match:
-                    latex_link = re.sub(r'<a[^>]*>([^<]+)</a>',
+                    latex_link = re.sub(
+                        r"<a[^>]*>([^<]+)</a>",
                         converter.convert(occurrence).strip(),
-                        latex_link, count=1)
+                        latex_link,
+                        count=1,
+                    )
                 new_blocks.append(latex_link)
             else:
                 new_blocks.append(block)
-        return '\n\n'.join(new_blocks)
+        return "\n\n".join(new_blocks)
+
 
 class RootRemovalTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr: str) -> str:
-        lines = instr.split('\n')
-        if lines[0] == '<root>' and lines[-1] == '</root>':
+        lines = instr.split("\n")
+        if lines[0] == "<root>" and lines[-1] == "</root>":
             lines = lines[1:-1]
-        return '\n'.join(lines)
+        return "\n".join(lines)
+
 
 class Link2Latex(object):
     def convert(self, instr):
         dom = xml.dom.minidom.parseString(instr)
         link = dom.documentElement
-        href = link.getAttribute('href')
+        href = link.getAttribute("href")
 
-        desc = re.search(r'>([^<]+)', instr)
+        desc = re.search(r">([^<]+)", instr)
         if href == desc.group(1):
             out = r"\\url{%s}" % (href)
         else:
-            out = \
-                """
+            out = """
                 \\\href{%s}{%s}
                 """ % (href, desc.group(1))
         return out
@@ -517,7 +538,7 @@ definition in footnote market <sup> as opposed to putting a reference link).
 """
 
 
-class FootnoteExtension (markdown.Extension):
+class FootnoteExtension(markdown.Extension):
     DEF_RE = re.compile(r"(\ ?\ ?\ ?)\[\^([^\]]*)\]:\s*(.*)")
     SHORT_USE_RE = re.compile(r"\[\^([^\]]*)\]", re.M)  # [^a]
 
@@ -531,19 +552,17 @@ class FootnoteExtension (markdown.Extension):
         md.registerExtension(self)
 
         # Insert a preprocessor before ReferencePreprocessor
-        #index = md.preprocessors.index(md_globals['REFERENCE_PREPROCESSOR'])
-        #preprocessor = FootnotePreprocessor(self)
-        #preprocessor.md = md
-        #md.preprocessors.insert(index, preprocessor)
-        md.preprocessors.add('footnotes', FootnotePreprocessor(self), '_begin')
+        # index = md.preprocessors.index(md_globals['REFERENCE_PREPROCESSOR'])
+        # preprocessor = FootnotePreprocessor(self)
+        # preprocessor.md = md
+        # md.preprocessors.insert(index, preprocessor)
+        md.preprocessors.add("footnotes", FootnotePreprocessor(self), "_begin")
 
         ## Insert an inline pattern before ImageReferencePattern
         FOOTNOTE_RE = r"\[\^([^\]]*)\]"  # blah blah [^1] blah
-        #index = md.inlinePatterns.index(md_globals['IMAGE_REFERENCE_PATTERN'])
-        #md.inlinePatterns.insert(index, FootnotePattern(FOOTNOTE_RE, self))
-        md.inlinePatterns.add('footnotes', FootnotePattern(FOOTNOTE_RE, self),
-                              '_begin')        
-        
+        # index = md.inlinePatterns.index(md_globals['IMAGE_REFERENCE_PATTERN'])
+        # md.inlinePatterns.insert(index, FootnotePattern(FOOTNOTE_RE, self))
+        md.inlinePatterns.add("footnotes", FootnotePattern(FOOTNOTE_RE, self), "_begin")
 
     def reset(self):
         self.used_footnotes = {}
@@ -580,21 +599,18 @@ class FootnotePreprocessor:
     def _handleFootnoteDefinitions(self, lines):
         """Recursively finds all footnote definitions in the lines.
 
-            @param lines: a list of lines of text
-            @returns: a string representing the text with footnote
-                      definitions removed """
+        @param lines: a list of lines of text
+        @returns: a string representing the text with footnote
+                  definitions removed"""
 
         i, id, footnote = self._findFootnoteDefinition(lines)
 
         if id:
-
             plain = lines[:i]
 
-            detabbed, theRest = self.blockGuru.detectTabbed(lines[i + 1:])
+            detabbed, theRest = self.blockGuru.detectTabbed(lines[i + 1 :])
 
-            self.footnotes.setFootnote(id,
-                                       footnote + "\n"
-                                       + "\n".join(detabbed))
+            self.footnotes.setFootnote(id, footnote + "\n" + "\n".join(detabbed))
 
             more_plain = self._handleFootnoteDefinitions(theRest)
             return plain + [""] + more_plain
@@ -605,8 +621,8 @@ class FootnotePreprocessor:
     def _findFootnoteDefinition(self, lines):
         """Finds the first line of a footnote definition.
 
-            @param lines: a list of lines of text
-            @returns: the index of the line containing a footnote definition.
+        @param lines: a list of lines of text
+        @returns: the index of the line containing a footnote definition.
         """
 
         counter = 0
@@ -619,23 +635,21 @@ class FootnotePreprocessor:
 
 
 class FootnotePattern(markdown.inlinepatterns.Pattern):
-
     def __init__(self, pattern, footnotes):
         markdown.inlinepatterns.Pattern.__init__(self, pattern)
         self.footnotes = footnotes
 
     def handleMatch(self, m, doc):
-        sup = doc.createElement('sup')
+        sup = doc.createElement("sup")
         id = m.group(2)
         # stick the footnote text in the sup
-        self.footnotes.md._processSection(sup,
-                                          self.footnotes.footnotes[id].split("\n"))
+        self.footnotes.md._processSection(sup, self.footnotes.footnotes[id].split("\n"))
         return sup
 
 
 def template(template_fo, latex_to_insert):
     tmpl = template_fo.read()
-    tmpl = tmpl.replace('INSERT-TEXT-HERE', latex_to_insert)
+    tmpl = tmpl.replace("INSERT-TEXT-HERE", latex_to_insert)
     return tmpl
     # title_items = [ '\\title', '\\end{abstract}', '\\thanks', '\\author' ]
     # has_title_stuff = False
@@ -645,8 +659,8 @@ def template(template_fo, latex_to_insert):
 
 def main():
     import optparse
-    usage = \
-        """usage: %prog [options] <in-file-path>
+
+    usage = """usage: %prog [options] <in-file-path>
 
         Given a file path, process it using markdown2latex and print the result on
         stdout.
@@ -655,9 +669,13 @@ def main():
         template where text should be inserted.
         """
     parser = optparse.OptionParser(usage)
-    parser.add_option('-t', '--template', dest='template',
-                      default='',
-                      help='path to latex template file (optional)')
+    parser.add_option(
+        "-t",
+        "--template",
+        dest="template",
+        default="",
+        help="path to latex template file (optional)",
+    )
     (options, args) = parser.parse_args()
     if not len(args) > 0:
         parser.print_help()
@@ -676,5 +694,6 @@ def main():
 
     print(out)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

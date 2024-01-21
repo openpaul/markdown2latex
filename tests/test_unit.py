@@ -2,6 +2,7 @@ import markdown
 import pytest
 
 from mdx_latex import (
+    Img2Latex,
     LaTeXExtension,
     escape_latex_entities,
     inline_html_latex,
@@ -96,6 +97,7 @@ A simple list:
             "A table now (this is *really* complicated):",
             "A table now (this is \\emph{really} complicated):",
         ),
+        ("[link](https://example.com)", "\\href{https://example.com}{link}"),
     ],
 )
 def test_one_line(markdown_text: str, expected_output: str):
@@ -111,4 +113,18 @@ def test_one_line(markdown_text: str, expected_output: str):
 )
 def test_multi_line(markdown_text: str, expected_output: str):
     output = markdown.markdown(markdown_text, extensions=[LaTeXExtension()])
+    assert output == expected_output
+
+
+def test_Img2Latex():
+    html_text = '<img alt="Hello" src="Dragster.jpg" />'
+    expected_output = """
+            \\begin{figure}[H]
+            \\centering
+            \\includegraphics[max width=\\linewidth]{Dragster.jpg}
+            \\caption{Hello}
+            \\end{figure}
+            """
+    converter = Img2Latex()
+    output = converter.convert(html_text)
     assert output == expected_output

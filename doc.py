@@ -63,4 +63,4 @@ Version 2.1: (August 2013)
   * Update math delimiters
 """
 
-__version__ = '2.1'
+__version__ = "2.1"

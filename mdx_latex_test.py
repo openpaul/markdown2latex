@@ -1,10 +1,9 @@
 import markdown
 import mdx_latex
 
-class TestMkdn2Latex:
 
-    mkdn_input = \
-'''# Anna Karenina #
+class TestMkdn2Latex:
+    mkdn_input = """# Anna Karenina #
 
 ## A first section ##
 
@@ -67,9 +66,8 @@ Stuff we should escape A&R, a %tage sign
     Now some preformatted text:
     
       $ sudo python ...
-'''
-    expected = \
-'''\\title{Anna Karenina}
+"""
+    expected = """\\title{Anna Karenina}
 
 % ----------------------------------------------------------------
 \maketitle
@@ -145,7 +143,7 @@ Stuff we should escape A\\&R, a \\%tage sign
 Now some preformatted text:
 
   \\$ sudo python ...
-\\end{verbatim}'''
+\\end{verbatim}"""
     md = markdown.Markdown()
 
     def test_1(self):
@@ -154,39 +152,37 @@ Now some preformatted text:
         ltx.extendMarkdown(self.md)
         # self.footnoteExtension.extendMarkdown(self.mdx_latexer)
         out = self.md.convert(self.mkdn_input)
-        outlines = out.split('\n')
-        explines = self.expected.split('\n')
+        outlines = out.split("\n")
+        explines = self.expected.split("\n")
         # TODO: this misses stuff if out > exp
-        print('******** EXPECTED *********')
+        print("******** EXPECTED *********")
         print(self.expected)
-        print('******** ACTUAL *********')
+        print("******** ACTUAL *********")
         print(out)
-        print('******** ANALYSIS *********')
+        print("******** ANALYSIS *********")
         for ii in range(len(explines)):
             if outlines[ii] != explines[ii]:
                 print(ii)
-                print('out:', '"%s"' % outlines[ii])
-                print('exp:', '"%s"' % explines[ii])
+                print("out:", '"%s"' % outlines[ii])
+                print("exp:", '"%s"' % explines[ii])
         if len(explines) < len(outlines):
-            print('Out longer than expected:')
-            print(outlines[len(explines):])
+            print("Out longer than expected:")
+            print(outlines[len(explines) :])
         # for ii in range(len(out)):
         #    if out[ii] != self.expected[ii]:
         #        print out[ii:ii+10]
-        assert out == self.expected 
+        assert out == self.expected
+
 
 class TestEscapeLatexEntities:
-
-    in1 = \
-'''"Hello world". & C## Don't have 'another quote"
+    in1 = """"Hello world". & C## Don't have 'another quote"
 
 Now for "'Something a little' more complicated". "And again."
-'''
-    exp1 = \
-'''``Hello world''. \\& C\#\# Don't have `another quote''
+"""
+    exp1 = """``Hello world''. \\& C\#\# Don't have `another quote''
 
 Now for ```Something a little' more complicated''. ``And again.''
-'''
+"""
 
     def test_1(self):
         out = mdx_latex.escape_latex_entities(self.in1)
@@ -196,9 +192,9 @@ Now for ```Something a little' more complicated''. ``And again.''
         #    print ii
         #    assert out[ii] == self.exp1[ii]
 
-class TestTable2Latex:
 
-    intable1 = '''
+class TestTable2Latex:
+    intable1 = """
 <table>
     <caption>My Caption</caption>
     <thead>
@@ -213,9 +209,9 @@ class TestTable2Latex:
             <td>1.0</td><td>2.0</td><td>1.0</td><td>2.0</td>
         </tr>
     </tbody>
-</table>'''
+</table>"""
 
-    exp1 = '''
+    exp1 = """
 \\begin{table}
 \\begin{tabular}{|c|c|c|c|}
 \\hline
@@ -229,7 +225,7 @@ class TestTable2Latex:
 \\\\[5pt]
 \\caption{My Caption}
 \\end{table}
-'''
+"""
 
     def test_1(self):
         converter = mdx_latex.Table2Latex()
@@ -239,9 +235,9 @@ class TestTable2Latex:
         print(ss)
         assert out == ss
 
-class TestMathConvert:
 
-    intext = '''
+class TestMathConvert:
+    intext = """
 $$ \\sum_{x=1} ... $$
 
 Hello world, $$x$$. $100 million.
@@ -254,9 +250,9 @@ W & = & y + z \\\\
   & = & 3x
 \end{eqnarray}
 $$
-'''
+"""
 
-    outtext = '''
+    outtext = """
 \\[ \\sum_{x=1} ... \\]
 
 Hello world, $x$. \$100 million.
@@ -269,7 +265,7 @@ W & = & y + z \\\\
   & = & 3x
 \end{eqnarray}
 \\]
-'''
+"""
 
     def test_1(self):
         converter = mdx_latex.MathTextPostProcessor()
@@ -277,19 +273,19 @@ W & = & y + z \\\\
         print(out)
         assert out == self.outtext
 
+
 class TestImgConvert:
-
-    intext = '''
+    intext = """
 <img src="blah.png" alt="abc abc" class="xyz" />
-'''
+"""
 
-    exp1 = '''
+    exp1 = """
 \\begin{figure}
 \\centering
 \\includegraphics[width=\\textwidth]{blah.png}
 \\caption{abc abc}
 \\end{figure}
-'''
+"""
 
     def test_1(self):
         converter = mdx_latex.Img2Latex()
