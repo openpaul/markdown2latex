@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 # do some fancy importing stuff to allow use to override things in this module
 # in this file while still importing * for use in our own classes
-from hmac import new
 import re
 import sys
 import markdown
@@ -426,8 +425,6 @@ class Table2Latex:
 
 class ImageTextPostProcessor(markdown.postprocessors.Postprocessor):
     def run(self, instr):
-        print("ImageTextPostProcessor")
-        print(instr)
         """Process all img tags
 
         Similar to process_tables this is not very sophisticated and for it
